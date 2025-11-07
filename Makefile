@@ -1,9 +1,18 @@
 CC = gcc
 CFLAGS = -Wall -g -Iinclude
-LDFLAGS = 
+LDFLAGS = -lreadline
+
 TARGET = bin/myshell
 SRCDIR = src
-SOURCES = $(wildcard $(SRCDIR)/*.c)
+
+# Explicitly list source files to avoid compiling test files
+SOURCES = $(SRCDIR)/builtins.c \
+          $(SRCDIR)/execute.c \
+          $(SRCDIR)/history.c \
+          $(SRCDIR)/main.c \
+          $(SRCDIR)/readline_support.c \
+          $(SRCDIR)/shell.c
+
 OBJECTS = $(SOURCES:.c=.o)
 
 # Default target
@@ -21,10 +30,13 @@ $(TARGET): $(OBJECTS)
 # Clean build artifacts
 clean:
 	rm -f $(OBJECTS) $(TARGET)
+	find src -name "*.o" -delete
+	find . -name "test_*" -delete
 
-# Install dependencies (for later features)
+# Install dependencies
 deps:
 	sudo apt update
-	sudo apt install -y libreadline-dev
+	sudo apt install -y libreadline-dev build-essential
 
 .PHONY: all clean deps
+
