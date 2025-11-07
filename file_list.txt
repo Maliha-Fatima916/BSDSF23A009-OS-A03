@@ -1,0 +1,7 @@
+total 20
+drwxrwxr-x 2 maliha maliha 4096 Nov  7 22:25 bin
+-rw-r--r-- 1 maliha maliha    0 Nov  7 22:26 file_list.txt
+drwxrwxr-x 2 maliha maliha 4096 Nov  7 22:19 include
+-rw-rw-r-- 1 maliha maliha  893 Nov  7 22:25 Makefile
+-rw-rw-r-- 1 maliha maliha   20 Nov  7 16:35 README.md
+drwxrwxr-x 2 maliha maliha 4096 Nov  7 22:25 src

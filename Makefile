@@ -1,3 +1,4 @@
+# Compiler and flags
 CC = gcc
 CFLAGS = -Wall -g -Iinclude
 LDFLAGS = -lreadline
@@ -5,13 +6,15 @@ LDFLAGS = -lreadline
 TARGET = bin/myshell
 SRCDIR = src
 
-# Explicitly list source files to avoid compiling test files
+# Explicitly list source files
 SOURCES = $(SRCDIR)/builtins.c \
           $(SRCDIR)/execute.c \
           $(SRCDIR)/history.c \
           $(SRCDIR)/main.c \
           $(SRCDIR)/readline_support.c \
-          $(SRCDIR)/shell.c
+          $(SRCDIR)/shell.c \
+          $(SRCDIR)/parser.c \
+          $(SRCDIR)/redirection.c
 
 OBJECTS = $(SOURCES:.c=.o)
 
