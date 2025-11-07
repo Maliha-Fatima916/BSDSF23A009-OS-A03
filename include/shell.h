@@ -1,4 +1,4 @@
-#define SHELL_H
+#define  SHELL_H
 #define SHELL_H
 
 #include <stdio.h>
@@ -61,10 +61,19 @@ rl_completion_func_t* rl_attempted_completion_function = NULL;
 #define HISTORY_SIZE 20
 #define MAX_PIPES 10
 #define MAX_JOBS 100
-#define MAX_IF_BLOCKS 10  // NEW: Maximum nested if blocks
-#define MAX_BLOCK_LINES 20 // NEW: Maximum lines in then/else blocks
+#define MAX_IF_BLOCKS 10
+#define MAX_BLOCK_LINES 20
+#define MAX_VARIABLES 100  // NEW: Maximum number of variables
+#define VAR_NAME_LEN 50    // NEW: Maximum variable name length
+#define VAR_VALUE_LEN 256  // NEW: Maximum variable value length
 
-// NEW: Structure for if-then-else block
+// NEW: Structure for shell variables
+typedef struct {
+    char name[VAR_NAME_LEN];
+    char value[VAR_VALUE_LEN];
+} variable_t;
+
+// Structure for if-then-else block
 typedef struct {
     char* condition;                    // Condition command
     char* then_commands[MAX_BLOCK_LINES]; // Commands in then block
@@ -136,11 +145,20 @@ void print_jobs();
 void cleanup_zombies();
 int execute_background(command_t* cmd);
 
-// NEW: if-then-else function prototypes
+// if-then-else function prototypes
 int parse_if_block(char** lines, int num_lines, if_block_t* if_block);
 int execute_if_block(if_block_t* if_block);
 int is_control_keyword(const char* word);
 char* read_multiline_command(const char* initial_prompt);
-void free_if_block(if_block_t* if_block);  // NEW: Cleanup function
+void free_if_block(if_block_t* if_block);
+
+// NEW: Variable function prototypes
+void init_variables();
+void set_variable(const char* name, const char* value);
+char* get_variable(const char* name);
+int is_variable_assignment(const char* cmdline);
+int handle_variable_assignment(const char* cmdline);
+char* expand_variables(const char* str);
+void print_variables();
 
 

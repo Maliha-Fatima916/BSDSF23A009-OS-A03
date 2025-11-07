@@ -1,6 +1,6 @@
 #include "shell.h"
 
-// NEW: Function to check if command starts with control structure
+// Function to check if command starts with control structure
 int starts_with_control_structure(const char* cmdline) {
     if (cmdline == NULL) return 0;
     
@@ -10,7 +10,7 @@ int starts_with_control_structure(const char* cmdline) {
     return (strncmp(cmdline, "if ", 3) == 0);
 }
 
-// NEW: Function to split multiline command into individual lines
+// Function to split multiline command into individual lines
 int split_into_lines(const char* full_command, char*** lines) {
     if (full_command == NULL || lines == NULL) return 0;
     
@@ -57,6 +57,9 @@ int main() {
     
     // Initialize job control
     init_jobs();
+    
+    // Initialize variables
+    init_variables();
 
     while (1) {
         // Clean up zombie processes before prompt
@@ -68,6 +71,13 @@ int main() {
         
         if (cmdline == NULL) {
             break; // EOF (Ctrl+D)
+        }
+
+        // NEW: Handle variable assignments FIRST, before history expansion
+        if (handle_variable_assignment(cmdline)) {
+            // Variable was assigned, don't execute as command
+            free(cmdline);
+            continue;
         }
 
         // Handle history expansion before adding to our internal history
@@ -84,7 +94,7 @@ int main() {
             }
         }
         
-        // NEW: Handle control structures (if-then-else)
+        // Handle control structures (if-then-else)
         if (starts_with_control_structure(cmdline)) {
             // Read the complete multiline block
             char* full_block = read_multiline_command(cmdline);
