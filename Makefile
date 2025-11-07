@@ -1,4 +1,3 @@
-
 CC = gcc
 CFLAGS = -Wall -g -Iinclude
 LDFLAGS = -lreadline
@@ -15,7 +14,8 @@ SOURCES = $(SRCDIR)/builtins.c \
           $(SRCDIR)/shell.c \
           $(SRCDIR)/parser.c \
           $(SRCDIR)/redirection.c \
-          $(SRCDIR)/jobs.c
+          $(SRCDIR)/jobs.c \
+          $(SRCDIR)/control_structures.c
 
 OBJECTS = $(SOURCES:.c=.o)
 

@@ -1,5 +1,52 @@
 #include "shell.h"
 
+// NEW: Function to check if command starts with control structure
+int starts_with_control_structure(const char* cmdline) {
+    if (cmdline == NULL) return 0;
+    
+    // Skip leading whitespace
+    while (*cmdline == ' ' || *cmdline == '\t') cmdline++;
+    
+    return (strncmp(cmdline, "if ", 3) == 0);
+}
+
+// NEW: Function to split multiline command into individual lines
+int split_into_lines(const char* full_command, char*** lines) {
+    if (full_command == NULL || lines == NULL) return 0;
+    
+    // Count lines (split by semicolons or newlines in the buffer)
+    int line_count = 1;
+    const char* ptr = full_command;
+    
+    while (*ptr) {
+        if (*ptr == ';') line_count++;
+        ptr++;
+    }
+    
+    // Allocate lines array
+    *lines = malloc(line_count * sizeof(char*));
+    if (*lines == NULL) return 0;
+    
+    // Split the command
+    char* copy = strdup(full_command);
+    int count = 0;
+    char* token = strtok(copy, ";");
+    
+    while (token != NULL && count < line_count) {
+        // Trim whitespace
+        while (*token == ' ' || *token == '\t') token++;
+        char* end = token + strlen(token) - 1;
+        while (end > token && (*end == ' ' || *end == '\t' || *end == '\n')) end--;
+        *(end + 1) = '\0';
+        
+        (*lines)[count++] = strdup(token);
+        token = strtok(NULL, ";");
+    }
+    
+    free(copy);
+    return count;
+}
+
 int main() {
     char* cmdline;
     pipeline_t pipeline;
@@ -8,11 +55,11 @@ int main() {
     // Initialize Readline if available
     initialize_readline();
     
-    // NEW: Initialize job control
+    // Initialize job control
     init_jobs();
 
     while (1) {
-        // NEW: Clean up zombie processes before prompt
+        // Clean up zombie processes before prompt
         cleanup_zombies();
         update_jobs();
 
@@ -35,6 +82,39 @@ int main() {
                 free(cmdline);
                 continue;  // Skip to next iteration if history expansion failed
             }
+        }
+        
+        // NEW: Handle control structures (if-then-else)
+        if (starts_with_control_structure(cmdline)) {
+            // Read the complete multiline block
+            char* full_block = read_multiline_command(cmdline);
+            free(cmdline);
+            
+            if (full_block == NULL) {
+                continue;
+            }
+            
+            // Split into individual lines
+            char** lines = NULL;
+            int line_count = split_into_lines(full_block, &lines);
+            
+            if (line_count > 0) {
+                // Parse and execute the if block
+                if_block_t if_block;
+                if (parse_if_block(lines, line_count, &if_block) == 0) {
+                    execute_if_block(&if_block);
+                    free_if_block(&if_block);
+                }
+                
+                // Free lines
+                for (int i = 0; i < line_count; i++) {
+                    free(lines[i]);
+                }
+                free(lines);
+            }
+            
+            free(full_block);
+            continue;
         }
         
         // Add non-empty commands to our internal history (after expansion)
