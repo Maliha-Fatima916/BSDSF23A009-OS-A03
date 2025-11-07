@@ -1,6 +1,6 @@
 #include "shell.h"
 
-// Parse command line for redirection and pipes
+// Parse command line for redirection, pipes, and command chaining
 int parse_redirection_pipes(char* cmdline, pipeline_t* pipeline) {
     if (cmdline == NULL || pipeline == NULL) {
         return -1;
@@ -46,6 +46,15 @@ int parse_redirection_pipes(char* cmdline, pipeline_t* pipeline) {
             continue;
         }
         
+        // Check for command separator (semicolon)
+        else if (strcmp(tokens[i], ";") == 0) {
+            pipeline->commands[cmd_index].args[arg_index] = NULL;
+            cmd_index++;
+            arg_index = 0;
+            i++;
+            continue;
+        }
+        
         // Check for input redirection
         else if (strcmp(tokens[i], "<") == 0) {
             if (i + 1 < token_count) {
@@ -68,7 +77,7 @@ int parse_redirection_pipes(char* cmdline, pipeline_t* pipeline) {
             }
         }
         
-        // Check for background execution (for next feature)
+        // Check for background execution
         else if (strcmp(tokens[i], "&") == 0) {
             pipeline->commands[cmd_index].background = 1;
             i++;
@@ -81,7 +90,7 @@ int parse_redirection_pipes(char* cmdline, pipeline_t* pipeline) {
 
         // Check bounds
         if (cmd_index >= MAX_PIPES) {
-            fprintf(stderr, "Error: too many pipes (max %d)\n", MAX_PIPES);
+            fprintf(stderr, "Error: too many commands (max %d)\n", MAX_PIPES);
             return -1;
         }
         if (arg_index >= MAXARGS - 1) {

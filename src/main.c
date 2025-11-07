@@ -7,8 +7,15 @@ int main() {
 
     // Initialize Readline if available
     initialize_readline();
+    
+    // NEW: Initialize job control
+    init_jobs();
 
     while (1) {
+        // NEW: Clean up zombie processes before prompt
+        cleanup_zombies();
+        update_jobs();
+
         // Use readline if available, otherwise fallback
         cmdline = read_cmd_readline(PROMPT);
         
@@ -35,7 +42,7 @@ int main() {
             add_to_history(cmdline);
         }
 
-        // NEW: Parse for redirection and pipes
+        // Parse for redirection, pipes, and command chaining
         if (parse_redirection_pipes(cmdline, &pipeline) > 0) {
             // Execute the parsed command(s)
             result = execute_pipeline(&pipeline);
